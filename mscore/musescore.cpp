@@ -121,6 +121,7 @@ double converterDpi = 0;
 QString mscoreGlobalShare;
 static QStringList recentScores;
 static QString outFileName;
+static QString audioDriver;
 static QString pluginName;
 static QString styleFile;
 QString localeName;
@@ -1328,6 +1329,7 @@ static void usage()
         "   -L        layout debug\n"
         "   -s        no internal synthesizer\n"
         "   -m        no midi\n"
+        "   -a driver use audio driver: jack alsa pulse portaudio\n"
         "   -n        start with new score\n"
         "   -I        dump midi input\n"
         "   -O        dump midi output\n"
@@ -2253,7 +2255,7 @@ int main(int argc, char* av[])
                   case 'v':
                         printVersion("MuseScore");
                         return 0;
-                   case 'd':
+                  case 'd':
                         MScore::debugMode = true;
                         break;
                   case 'L':
@@ -2264,6 +2266,11 @@ int main(int argc, char* av[])
                         break;
                   case 'm':
                         noMidi = true;
+                        break;
+                  case 'a':
+                        if (argv.size() - i < 2)
+                              usage();
+                        audioDriver = argv.takeAt(i + 1);
                         break;
                   case 'n':
                         startWithNewScore = true;
@@ -2436,10 +2443,10 @@ int main(int argc, char* av[])
                   case STYLE_NATIVE:
                         break;
                   }
-            seq                = new Seq();
-            MScore::seq        = seq;
-            Driver* driver     = driverFactory(seq);
-            if(driver) {
+            seq            = new Seq();
+            MScore::seq    = seq;
+            Driver* driver = driverFactory(seq, audioDriver);
+            if (driver) {
                   synti              = synthesizerFactory();
                   MScore::sampleRate = driver->sampleRate();
                   synti->setSampleRate(MScore::sampleRate);
@@ -2448,10 +2455,10 @@ int main(int argc, char* av[])
                   seq->setMasterSynthesizer(synti);
                   }
             else {
-                  MScore::seq = 0;
-                  seq = 0;
                   delete seq;
-                  noSeq = true;
+                  MScore::seq = 0;
+                  seq         = 0;
+                  noSeq       = true;
                   }
             }
       else
