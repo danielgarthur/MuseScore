@@ -4871,7 +4871,7 @@ MeasureBase* ScoreView::checkSelectionStateForInsertMeasure()
 
       mb = _score->selection().findMeasure();
       if (mb)
-            return static_cast<MeasureBase*>(mb);
+            return mb;
 
       Element* e = _score->selection().element();
       if (e) {
